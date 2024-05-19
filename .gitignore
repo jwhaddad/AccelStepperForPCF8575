@@ -29,3 +29,6 @@
 *.app
 
 \.DS_Store
+
+# PCF8574 library
+*\PCF8574

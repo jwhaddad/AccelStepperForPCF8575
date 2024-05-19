@@ -1,9 +1,9 @@
-// AccelStepper.cpp
+// AccelStepperForPCF8574.cpp
 //
 // Copyright (C) 2009-2020 Mike McCauley
-// $Id: AccelStepper.cpp,v 1.24 2020/04/20 00:15:03 mikem Exp mikem $
+// $Id: AccelStepperForPCF8574.cpp,v 1.24 2020/04/20 00:15:03 mikem Exp mikem $
 
-#include "AccelStepper.h"
+#include "AccelStepperForPCF8574.h"
 
 #if 0
 // Some debugging assistance
@@ -20,7 +20,7 @@ void dump(uint8_t* p, int l)
 }
 #endif
 
-void AccelStepper::moveTo(long absolute)
+void AccelStepperForPCF8574::moveTo(long absolute)
 {
     if (_targetPos != absolute)
     {
@@ -30,7 +30,7 @@ void AccelStepper::moveTo(long absolute)
     }
 }
 
-void AccelStepper::move(long relative)
+void AccelStepperForPCF8574::move(long relative)
 {
     moveTo(_currentPos + relative);
 }
@@ -38,7 +38,7 @@ void AccelStepper::move(long relative)
 // Implements steps according to the current step interval
 // You must call this at least once per step
 // returns true if a step occurred
-boolean AccelStepper::runSpeed()
+boolean AccelStepperForPCF8574::runSpeed()
 {
     // Dont do anything unless we actually have a step interval
     if (!_stepInterval)
@@ -69,24 +69,24 @@ boolean AccelStepper::runSpeed()
     }
 }
 
-long AccelStepper::distanceToGo()
+long AccelStepperForPCF8574::distanceToGo()
 {
     return _targetPos - _currentPos;
 }
 
-long AccelStepper::targetPosition()
+long AccelStepperForPCF8574::targetPosition()
 {
     return _targetPos;
 }
 
-long AccelStepper::currentPosition()
+long AccelStepperForPCF8574::currentPosition()
 {
     return _currentPos;
 }
 
 // Useful during initialisations or after initial positioning
 // Sets speed to 0
-void AccelStepper::setCurrentPosition(long position)
+void AccelStepperForPCF8574::setCurrentPosition(long position)
 {
     _targetPos = _currentPos = position;
     _n = 0;
@@ -95,7 +95,7 @@ void AccelStepper::setCurrentPosition(long position)
 }
 
 // Subclasses can override
-unsigned long AccelStepper::computeNewSpeed()
+unsigned long AccelStepperForPCF8574::computeNewSpeed()
 {
     long distanceTo = distanceToGo(); // +ve is clockwise from curent location
 
@@ -182,15 +182,18 @@ unsigned long AccelStepper::computeNewSpeed()
 // You must call this at least once per step, preferably in your main loop
 // If the motor is in the desired position, the cost is very small
 // returns true if the motor is still running to the target position.
-boolean AccelStepper::run()
+boolean AccelStepperForPCF8574::run()
 {
     if (runSpeed())
 	computeNewSpeed();
     return _speed != 0.0 || distanceToGo() != 0;
 }
 
-AccelStepper::AccelStepper(uint8_t interface, uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, bool enable)
+AccelStepperForPCF8574::AccelStepperForPCF8574(uint8_t interface, PCF8574 pcf8574, uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, bool enable)
+    : pcf8574(pcf8574)
 {
+    this->pcf8574.begin();
+
     _interface = interface;
     _currentPos = 0;
     _targetPos = 0;
@@ -225,8 +228,11 @@ AccelStepper::AccelStepper(uint8_t interface, uint8_t pin1, uint8_t pin2, uint8_
     setMaxSpeed(1);
 }
 
-AccelStepper::AccelStepper(void (*forward)(), void (*backward)())
+AccelStepperForPCF8574::AccelStepperForPCF8574(PCF8574 pcf8574, void (*forward)(), void (*backward)())
+    : pcf8574(pcf8574)
 {
+    this->pcf8574.begin();
+    
     _interface = 0;
     _currentPos = 0;
     _targetPos = 0;
@@ -260,7 +266,7 @@ AccelStepper::AccelStepper(void (*forward)(), void (*backward)())
     setMaxSpeed(1);
 }
 
-void AccelStepper::setMaxSpeed(float speed)
+void AccelStepperForPCF8574::setMaxSpeed(float speed)
 {
     if (speed < 0.0)
        speed = -speed;
@@ -277,12 +283,12 @@ void AccelStepper::setMaxSpeed(float speed)
     }
 }
 
-float   AccelStepper::maxSpeed()
+float   AccelStepperForPCF8574::maxSpeed()
 {
     return _maxSpeed;
 }
 
-void AccelStepper::setAcceleration(float acceleration)
+void AccelStepperForPCF8574::setAcceleration(float acceleration)
 {
     if (acceleration == 0.0)
 	return;
@@ -299,12 +305,12 @@ void AccelStepper::setAcceleration(float acceleration)
     }
 }
 
-float   AccelStepper::acceleration()
+float   AccelStepperForPCF8574::acceleration()
 {
     return _acceleration;
 }
 
-void AccelStepper::setSpeed(float speed)
+void AccelStepperForPCF8574::setSpeed(float speed)
 {
     if (speed == _speed)
         return;
@@ -319,13 +325,13 @@ void AccelStepper::setSpeed(float speed)
     _speed = speed;
 }
 
-float AccelStepper::speed()
+float AccelStepperForPCF8574::speed()
 {
     return _speed;
 }
 
 // Subclasses can override
-void AccelStepper::step(long step)
+void AccelStepperForPCF8574::step(long step)
 {
     switch (_interface)
     {
@@ -359,7 +365,7 @@ void AccelStepper::step(long step)
     }
 }
 
-long AccelStepper::stepForward()
+long AccelStepperForPCF8574::stepForward()
 {
     // Clockwise
     _currentPos += 1;
@@ -368,7 +374,7 @@ long AccelStepper::stepForward()
     return _currentPos;
 }
 
-long AccelStepper::stepBackward()
+long AccelStepperForPCF8574::stepBackward()
 {
     // Counter-clockwise
     _currentPos -= 1;
@@ -381,7 +387,7 @@ long AccelStepper::stepBackward()
 // bit 0 of the mask corresponds to _pin[0]
 // bit 1 of the mask corresponds to _pin[1]
 // ....
-void AccelStepper::setOutputPins(uint8_t mask)
+void AccelStepperForPCF8574::setOutputPins(uint8_t mask)
 {
     uint8_t numpins = 2;
     if (_interface == FULL4WIRE || _interface == HALF4WIRE)
@@ -390,11 +396,11 @@ void AccelStepper::setOutputPins(uint8_t mask)
 	numpins = 3;
     uint8_t i;
     for (i = 0; i < numpins; i++)
-	digitalWrite(_pin[i], (mask & (1 << i)) ? (HIGH ^ _pinInverted[i]) : (LOW ^ _pinInverted[i]));
+	this->pcf8574.digitalWrite(_pin[i], (mask & (1 << i)) ? (HIGH ^ _pinInverted[i]) : (LOW ^ _pinInverted[i]));
 }
 
 // 0 pin step function (ie for functional usage)
-void AccelStepper::step0(long step)
+void AccelStepperForPCF8574::step0(long step)
 {
     (void)(step); // Unused
     if (_speed > 0)
@@ -406,7 +412,7 @@ void AccelStepper::step0(long step)
 // 1 pin step function (ie for stepper drivers)
 // This is passed the current step number (0 to 7)
 // Subclasses can override
-void AccelStepper::step1(long step)
+void AccelStepperForPCF8574::step1(long step)
 {
     (void)(step); // Unused
 
@@ -423,7 +429,7 @@ void AccelStepper::step1(long step)
 // 2 pin step function
 // This is passed the current step number (0 to 7)
 // Subclasses can override
-void AccelStepper::step2(long step)
+void AccelStepperForPCF8574::step2(long step)
 {
     switch (step & 0x3)
     {
@@ -447,7 +453,7 @@ void AccelStepper::step2(long step)
 // 3 pin step function
 // This is passed the current step number (0 to 7)
 // Subclasses can override
-void AccelStepper::step3(long step)
+void AccelStepperForPCF8574::step3(long step)
 {
     switch (step % 3)
     {
@@ -469,7 +475,7 @@ void AccelStepper::step3(long step)
 // 4 pin step function for half stepper
 // This is passed the current step number (0 to 7)
 // Subclasses can override
-void AccelStepper::step4(long step)
+void AccelStepperForPCF8574::step4(long step)
 {
     switch (step & 0x3)
     {
@@ -494,7 +500,7 @@ void AccelStepper::step4(long step)
 // 3 pin half step function
 // This is passed the current step number (0 to 7)
 // Subclasses can override
-void AccelStepper::step6(long step)
+void AccelStepperForPCF8574::step6(long step)
 {
     switch (step % 6)
     {
@@ -528,7 +534,7 @@ void AccelStepper::step6(long step)
 // 4 pin half step function
 // This is passed the current step number (0 to 7)
 // Subclasses can override
-void AccelStepper::step8(long step)
+void AccelStepperForPCF8574::step8(long step)
 {
     switch (step & 0x7)
     {
@@ -567,67 +573,67 @@ void AccelStepper::step8(long step)
 }
     
 // Prevents power consumption on the outputs
-void    AccelStepper::disableOutputs()
+void    AccelStepperForPCF8574::disableOutputs()
 {   
     if (! _interface) return;
 
     setOutputPins(0); // Handles inversion automatically
     if (_enablePin != 0xff)
     {
-        pinMode(_enablePin, OUTPUT);
-        digitalWrite(_enablePin, LOW ^ _enableInverted);
+        this->pcf8574.pinMode(_enablePin, OUTPUT);
+        this->pcf8574.digitalWrite(_enablePin, LOW ^ _enableInverted);
     }
 }
 
-void    AccelStepper::enableOutputs()
+void    AccelStepperForPCF8574::enableOutputs()
 {
     if (! _interface) 
 	return;
 
-    pinMode(_pin[0], OUTPUT);
-    pinMode(_pin[1], OUTPUT);
+    this->pcf8574.pinMode(_pin[0], OUTPUT);
+    this->pcf8574.pinMode(_pin[1], OUTPUT);
     if (_interface == FULL4WIRE || _interface == HALF4WIRE)
     {
-        pinMode(_pin[2], OUTPUT);
-        pinMode(_pin[3], OUTPUT);
+        this->pcf8574.pinMode(_pin[2], OUTPUT);
+        this->pcf8574.pinMode(_pin[3], OUTPUT);
     }
     else if (_interface == FULL3WIRE || _interface == HALF3WIRE)
     {
-        pinMode(_pin[2], OUTPUT);
+        this->pcf8574.pinMode(_pin[2], OUTPUT);
     }
 
     if (_enablePin != 0xff)
     {
-        pinMode(_enablePin, OUTPUT);
-        digitalWrite(_enablePin, HIGH ^ _enableInverted);
+        this->pcf8574.pinMode(_enablePin, OUTPUT);
+        this->pcf8574.digitalWrite(_enablePin, HIGH ^ _enableInverted);
     }
 }
 
-void AccelStepper::setMinPulseWidth(unsigned int minWidth)
+void AccelStepperForPCF8574::setMinPulseWidth(unsigned int minWidth)
 {
     _minPulseWidth = minWidth;
 }
 
-void AccelStepper::setEnablePin(uint8_t enablePin)
+void AccelStepperForPCF8574::setEnablePin(uint8_t enablePin)
 {
     _enablePin = enablePin;
 
     // This happens after construction, so init pin now.
     if (_enablePin != 0xff)
     {
-        pinMode(_enablePin, OUTPUT);
-        digitalWrite(_enablePin, HIGH ^ _enableInverted);
+        this->pcf8574.pinMode(_enablePin, OUTPUT);
+        this->pcf8574.digitalWrite(_enablePin, HIGH ^ _enableInverted);
     }
 }
 
-void AccelStepper::setPinsInverted(bool directionInvert, bool stepInvert, bool enableInvert)
+void AccelStepperForPCF8574::setPinsInverted(bool directionInvert, bool stepInvert, bool enableInvert)
 {
     _pinInverted[0] = stepInvert;
     _pinInverted[1] = directionInvert;
     _enableInverted = enableInvert;
 }
 
-void AccelStepper::setPinsInverted(bool pin1Invert, bool pin2Invert, bool pin3Invert, bool pin4Invert, bool enableInvert)
+void AccelStepperForPCF8574::setPinsInverted(bool pin1Invert, bool pin2Invert, bool pin3Invert, bool pin4Invert, bool enableInvert)
 {    
     _pinInverted[0] = pin1Invert;
     _pinInverted[1] = pin2Invert;
@@ -637,13 +643,13 @@ void AccelStepper::setPinsInverted(bool pin1Invert, bool pin2Invert, bool pin3In
 }
 
 // Blocks until the target position is reached and stopped
-void AccelStepper::runToPosition()
+void AccelStepperForPCF8574::runToPosition()
 {
     while (run())
 	YIELD; // Let system housekeeping occur
 }
 
-boolean AccelStepper::runSpeedToPosition()
+boolean AccelStepperForPCF8574::runSpeedToPosition()
 {
     if (_targetPos == _currentPos)
 	return false;
@@ -655,13 +661,13 @@ boolean AccelStepper::runSpeedToPosition()
 }
 
 // Blocks until the new target position is reached
-void AccelStepper::runToNewPosition(long position)
+void AccelStepperForPCF8574::runToNewPosition(long position)
 {
     moveTo(position);
     runToPosition();
 }
 
-void AccelStepper::stop()
+void AccelStepperForPCF8574::stop()
 {
     if (_speed != 0.0)
     {    
@@ -673,7 +679,7 @@ void AccelStepper::stop()
     }
 }
 
-bool AccelStepper::isRunning()
+bool AccelStepperForPCF8574::isRunning()
 {
     return !(_speed == 0.0 && _targetPos == _currentPos);
 }
