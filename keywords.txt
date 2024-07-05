@@ -1,13 +1,13 @@
 #######################################
-# Syntax Coloring Map For AccelStepperForPCF8574
+# Syntax Coloring Map For AccelStepperForPCF8575
 #######################################
 
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
 
-AccelStepperForPCF8574	KEYWORD1
-MultiStepperForPCF8574	KEYWORD1
+AccelStepperForPCF8575	KEYWORD1
+MultiStepperForPCF8575	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)

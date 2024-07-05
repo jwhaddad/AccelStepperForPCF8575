@@ -30,5 +30,5 @@
 
 \.DS_Store
 
-# PCF8574 library
-*\PCF8574
+# PCF8575 library
+*\PCF8575

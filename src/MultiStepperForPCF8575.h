@@ -1,7 +1,7 @@
-// MultiStepperForPCF8574.h
+// MultiStepperForPCF8575.h
 
-#ifndef MultiStepperForPCF8574_h
-#define MultiStepperForPCF8574_h
+#ifndef MultiStepperForPCF8575_h
+#define MultiStepperForPCF8575_h
 
 #include <stdlib.h>
 #if ARDUINO >= 100
@@ -13,13 +13,13 @@
 
 #define MULTISTEPPER_MAX_STEPPERS 10
 
-class AccelStepperForPCF8574;
+class AccelStepperForPCF8575;
 
 /////////////////////////////////////////////////////////////////////
-/// \class MultiStepperForPCF8574 MultiStepperForPCF8574.h <MultiStepperForPCF8574.h>
-/// \brief Operate multiple AccelStepperForPCF8574s in a co-ordinated fashion
+/// \class MultiStepperForPCF8575 MultiStepperForPCF8575.h <MultiStepperForPCF8575.h>
+/// \brief Operate multiple AccelStepperForPCF8575s in a co-ordinated fashion
 ///
-/// This class can manage multiple AccelStepperForPCF8574s (up to MULTISTEPPER_MAX_STEPPERS = 10), 
+/// This class can manage multiple AccelStepperForPCF8575s (up to MULTISTEPPER_MAX_STEPPERS = 10), 
 /// and cause them all to move
 /// to selected positions at such a (constant) speed that they all arrive at their
 /// target position at the same time. This can be used to support devices with multiple steppers
@@ -28,19 +28,19 @@ class AccelStepperForPCF8574;
 /// to get linear straight line movement between arbitrary 2d (or 3d or ...) positions.
 ///
 /// Caution: only constant speed stepper motion is supported: acceleration and deceleration is not supported
-/// All the steppers managed by MultiStepperForPCF8574 will step at a constant speed to their
+/// All the steppers managed by MultiStepperForPCF8575 will step at a constant speed to their
 /// target (albeit perhaps different speeds for each stepper).
-class MultiStepperForPCF8574
+class MultiStepperForPCF8575
 {
 public:
     /// Constructor
-    MultiStepperForPCF8574();
+    MultiStepperForPCF8575();
 
     /// Add a stepper to the set of managed steppers
     /// There is an upper limit of MULTISTEPPER_MAX_STEPPERS = 10 to the number of steppers that can be managed
     /// \param[in] stepper Reference to a stepper to add to the managed list
     /// \return true if successful. false if the number of managed steppers would exceed MULTISTEPPER_MAX_STEPPERS
-    boolean addStepper(AccelStepperForPCF8574& stepper);
+    boolean addStepper(AccelStepperForPCF8575& stepper);
 
     /// Set the target positions of all managed steppers 
     /// according to a coordinate array.
@@ -64,15 +64,15 @@ public:
 private:
     /// Array of pointers to the steppers we are controlling.
     /// Fills from 0 onwards
-    AccelStepperForPCF8574* _steppers[MULTISTEPPER_MAX_STEPPERS];
+    AccelStepperForPCF8575* _steppers[MULTISTEPPER_MAX_STEPPERS];
 
     /// Number of steppers we are controlling and the number
     /// of steppers in _steppers[]
     uint8_t       _num_steppers;
 };
 
-/// @example MultiStepperForPCF8574.pde
-/// Use MultiStepperForPCF8574 class to manage multiple steppers and make them all move to 
+/// @example MultiStepperForPCF8575.pde
+/// Use MultiStepperForPCF8575 class to manage multiple steppers and make them all move to 
 /// the same position at the same time for linear 2d (or 3d) motion.
 
 #endif
